@@ -8,7 +8,7 @@
 --| Author           : Frederic Desnoes
 --| Created On       : 2020/05/06
 --| Last Modified By : $Author: Frederic Desnoes$
---| Last Modified On : $Date: 2021/05/08 $
+--| Last Modified On : $Date: 2022/06/27 $
 --| Status           : $State: Expe $
 --|
 --------------------------------------------------------------------------------
@@ -64,7 +64,7 @@ procedure Mandelbrot is
   X2 : constant float := 0.6;
   y1 : constant float := -1.2;
   y2 : constant float := 1.2;
-  zoom : constant float := 200.0; -- pour une distance de 1 sur le plan, on a 300 pixel sur l'image
+  zoom : constant float := 100.0; -- pour une distance de 1 sur le plan, on a 300 pixel sur l'image
   iteration_max : integer := 25;
 
   image_x : constant float := (x2-x1)*zoom;
@@ -148,7 +148,7 @@ procedure Mandelbrot is
           pixels (i,j) := 0;
         end loop;
       end loop;  
-       while Screen_X < image_x loop
+       while integer(Screen_X) < integer(image_x) loop
        Screen_Y:=0.0;
           while Screen_Y < image_y loop
             c_r := Screen_X / zoom + x1;
@@ -196,7 +196,7 @@ procedure Mandelbrot is
             -- value_color :=integer'image(integer'Min(pixels(i,j), 255));
             value_color :=Gnoga.types.color_type'value(integer'image(255-integer'Min(pixels(i,j), 255)));
             -- tmp_color := Gnoga.types.To_RGBA(0,0,integer'image(integer'Min(pixels(i,j),255)),1.0);
-            tmp_color := (value_color,0,0,1.0);
+            tmp_color := (0,0,value_color,1.0);
             -- Context.Stroke_Color("Gnoga.Types.Colors.To_Color_Enumeration(tmp_color)");
             Context.Stroke_Color(tmp_color);
             Context.Stroke_Text(".",i ,j);
