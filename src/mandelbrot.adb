@@ -16,6 +16,8 @@ with Ada.Unchecked_Conversion;
 with Ada.Numerics.Elementary_Functions;
 with Ada.Integer_Text_Io;    use Ada.Integer_Text_Io;
 with Ada.Exceptions;
+with Ada.Real_Time; use Ada.Real_Time;
+with Delay_Aux_Pkg;
 
 with Gnoga.Types;
 with Gnoga.Types.Colors;
@@ -140,15 +142,26 @@ procedure Mandelbrot is
     tmp_pixel: array (integer range 1 .. integer(image_x), integer range 1 .. integer(image_y)) of integer;
     value_color: Gnoga.Types.Color_Type;
     tmp_color: Gnoga.Types.RGBA_Type;
-    -- tmp_color_enum: Gnoga.Types.Colors_Enumeration;
+    task T1 is
+    	entry compute;
+    end T1;
+    --task T2;
+    --task T3;
+    --task T4;
+    task T5 is
+    	entry draw;
+    end T5;
+    
+    task body T1 is
       begin
+      accept compute;
       Screen_X:=0.0;  
       for i in 1 .. integer(image_x) loop
         for j in 1 .. integer(image_y) loop
           pixels (i,j) := 0;
         end loop;
-      end loop;  
-       while integer(Screen_X) < integer(image_x) loop
+      end loop; 
+       while Screen_X < image_x loop
        Screen_Y:=0.0;
           while Screen_Y < image_y loop
             c_r := Screen_X / zoom + x1;
@@ -187,6 +200,12 @@ procedure Mandelbrot is
           end loop;
           Screen_X := Screen_X +1.0;
         end loop;
+       end;
+    -- corps de la procedure
+    task body T5 is  
+    begin
+    accept draw;
+    delay 10.0;     
     for i in 1 .. integer(image_x) loop
       for j in 1 .. integer(image_y) loop
         if pixels (i,j) /= 0
@@ -204,7 +223,13 @@ procedure Mandelbrot is
           end if;
       end loop;
     end loop;
+    Delay_Aux_Pkg.Show_Elapsed_Time;
+    end;
     
+  begin
+  	null;
+  	T1.compute;
+  	T5.draw;
   end draw_buddhabrot;
 
   Procedure clear_screen is
