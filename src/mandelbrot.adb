@@ -8,7 +8,7 @@
 --| Author           : Frederic Desnoes
 --| Created On       : 2020/05/06
 --| Last Modified By : $Author: Frederic Desnoes$
---| Last Modified On : $Date: 2022/06/27 $
+--| Last Modified On : $Date: 2022/07/02$
 --| Status           : $State: Expe $
 --|
 --------------------------------------------------------------------------------
@@ -34,7 +34,6 @@ with Gnoga.Gui.Element.Canvas;
 with Gnoga.Gui.Element.Canvas.Context_2D; use Gnoga.Gui.Element.Canvas.Context_2D;
 with Gnoga.Gui.Element.Multimedia;
 with Gnoga.Gui.Element.form;
--- with Gnoga.Client.Storage;
 
 ----------------------------------------------------------------------------
 procedure Mandelbrot is
@@ -66,12 +65,6 @@ procedure Mandelbrot is
   Julia_Form_y1  : Gnoga.Gui.Element.Form.Form_Type;
   Julia_Input_text_y1: Gnoga.Gui.Element.Form.Text_Type;
   Julia_Question_Label_y1: Gnoga.Gui.Element.Form.Label_Type;
-
-   --   Julia_Label : Gnoga.Gui.Element.Form.Label_Type; 
-   --   Julia_Range : Gnoga.Gui.Element.Form.Range_Type; 
-   --   Julia_Range_Label : Gnoga.Gui.Element.Form.Label_Type; 
-   --   Julia_Value_Label : Gnoga.Gui.Element.Form.Label_Type;
-      -- Level_Integer_Depth: Integer:=1;
 
   X1 : constant float := -2.1;
   X2 : constant float := 0.6;
@@ -123,7 +116,8 @@ procedure Mandelbrot is
         end loop;
   end draw_mandelbrot;
  
-  procedure draw_julia (c_r:float; c_i: float; iteration_Max: Integer) is
+  procedure draw_julia (c_r:float; c_i: float; iteration_Max: Integer)
+  	with Pre => (c_r > -2.1 and c_r< 0.6 and c_i> -1.2 and c_i <1.2) is
     begin
     Screen_X:=0.0;    
      while Screen_X < image_x loop
@@ -309,13 +303,7 @@ procedure Mandelbrot is
       Context.Fill_Rectangle ((0, 0, integer(image_x), integer(image_y)));
     end clear_screen;
   
-  procedure Write_image_PPM_IO (ImageFractal: in out Context_2D_Type) is
-   --package PPM_IO is
-    -- new Ada.Streams.Stream_IO.File_Type (Integer);
-   --use PPM_IO;
-   -- F : Ada.Streams.Stream_IO.File_Type;
-   -- name : constant String := "Image_file";
-	
+  procedure Write_image_PPM_IO (ImageFractal: in out Context_2D_Type) is	
 	begin
    	 Create (F, Out_File, name & ".ppm");
    		--  PPM Header:
