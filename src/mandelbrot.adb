@@ -17,18 +17,24 @@ with Ada.Numerics.Elementary_Functions;
 with Ada.Integer_Text_Io;    use Ada.Integer_Text_Io;
 with Ada.Exceptions;
 with Ada.Real_Time; use Ada.Real_Time;
+with Ada.Sequential_IO;
+with Ada.Streams.Stream_IO; use Ada.Streams.Stream_IO;
+with Ada.Text_IO;
+with Interfaces; use interfaces;
 with Delay_Aux_Pkg;
 
 with Gnoga.Types;
-with Gnoga.Types.Colors;
+with Gnoga.Types.Colors; use Gnoga.Types.Colors;
 with Gnoga.Application.Singleton;
 with Gnoga.Gui.Base;
 with Gnoga.Gui.Window;
 with Gnoga.Gui.View;
 with Gnoga.Gui.Element.Common;
 with Gnoga.Gui.Element.Canvas;
-with Gnoga.Gui.Element.Canvas.Context_2D;
+with Gnoga.Gui.Element.Canvas.Context_2D; use Gnoga.Gui.Element.Canvas.Context_2D;
+with Gnoga.Gui.Element.Multimedia;
 with Gnoga.Gui.Element.form;
+-- with Gnoga.Client.Storage;
 
 ----------------------------------------------------------------------------
 procedure Mandelbrot is
@@ -44,6 +50,11 @@ procedure Mandelbrot is
   My_Button_Buddhabrot : Gnoga.Gui.Element.Common.Button_Type;
   My_Button_Image : Gnoga.Gui.Element.Common.Button_Type;
   My_Exit   : Gnoga.Gui.Element.Common.Button_Type;
+
+  Image_ini	: Image_Data_Type;
+  Image_sauvegarde  : Gnoga.Gui.Element.Common.IMG_Type; --Gnoga.Gui.Element.Multimedia.Video_Type; --
+  F : Ada.Streams.Stream_IO.File_Type;
+  name : constant String := "Image_file";
 
   Iterations_Form : Gnoga.Gui.Element.Form.Form_Type;
   Input_Text_Iterations : Gnoga.Gui.Element.Form.Text_Type;
@@ -66,7 +77,7 @@ procedure Mandelbrot is
   X2 : constant float := 0.6;
   y1 : constant float := -1.2;
   y2 : constant float := 1.2;
-  zoom : constant float := 100.0; -- pour une distance de 1 sur le plan, on a 300 pixel sur l'image
+  zoom : constant float := 200.0; -- pour une distance de 1 sur le plan, on a 300 pixel sur l'image
   iteration_max : integer := 25;
 
   image_x : constant float := (x2-x1)*zoom;
@@ -80,6 +91,8 @@ procedure Mandelbrot is
   Iteration : integer := 0;
   Screen_X : float := 0.0;
   Screen_Y : float := 0.0;
+  
+  
 
  procedure draw_mandelbrot (Iteration_Max: Integer) is
     begin
@@ -145,6 +158,9 @@ procedure Mandelbrot is
     task T1 is
     	entry compute;
     end T1;
+    task T2 is
+    	entry compute2;
+    end T2;
     --task T2;
     --task T3;
     --task T4;
@@ -152,11 +168,12 @@ procedure Mandelbrot is
     	entry draw;
     end T5;
     
+    
     task body T1 is
       begin
-      accept compute;
+      accept compute do
       Screen_X:=0.0;  
-      for i in 1 .. integer(image_x) loop
+      for i in 1 .. integer(image_x)/2 loop
         for j in 1 .. integer(image_y) loop
           pixels (i,j) := 0;
         end loop;
@@ -200,8 +217,63 @@ procedure Mandelbrot is
           end loop;
           Screen_X := Screen_X +1.0;
         end loop;
+        Delay_Aux_Pkg.Show_Elapsed_Time;
+       end compute;
        end;
-    -- corps de la procedure
+       
+       
+    task body T2 is
+      begin
+      accept compute2 do
+      Screen_X:=image_x/2.0+1.0;  
+      for i in integer(image_x/2.0)+1 .. integer(image_x) loop
+        for j in 1 .. integer(image_y) loop
+          pixels (i,j) := 0;
+        end loop;
+      end loop; 
+       while Screen_X < image_x loop
+       Screen_Y:=0.0;
+          while Screen_Y < image_y loop
+            c_r := Screen_X / zoom + x1;
+            c_i := Screen_Y / zoom + y1;
+            z_r := 0.0;
+            z_i := 0.0;
+            Iteration:= 0;
+            for i in 1 .. integer(image_x) loop
+              for j in 1 .. integer(image_y) loop
+                tmp_pixel (i,j) := 0;
+              end loop;
+            end loop;
+            while z_r* z_r + z_i * z_i < 4.0 and then Iteration < iteration_max loop
+              tmp := z_r;
+              z_r := z_r * z_r - z_i * z_i + c_r;
+              z_i := 2.0 * z_i*tmp  + c_i;
+              Iteration := Iteration + 1;
+              if integer((z_r-x1)*zoom) < integer(image_x) and integer((z_r-x1)*zoom) > 0 and integer((z_i-y1)*zoom) < integer(image_y) and integer((z_i-y1)*zoom) > 0
+                then
+                  tmp_pixel(integer((z_r-x1)*zoom),integer((z_i-y1)*zoom)) := 1;
+              end if;
+            end loop;
+            if Iteration /= Iteration_Max then
+              for i in integer(image_x/2.0)+1 .. integer(image_x) loop
+                for j in 1 .. integer(image_y) loop
+                  if tmp_pixel (i,j) = 1
+                    then
+                    pixels(i,j):=pixels(i,j)+1;
+                  end if;
+                end loop;
+              end loop;
+            else
+              null;
+            end if;
+            Screen_Y := Screen_Y +1.0;
+          end loop;
+          Screen_X := Screen_X +1.0;
+        end loop;
+        Delay_Aux_Pkg.Show_Elapsed_Time;
+        end compute2;
+    end;
+       
     task body T5 is  
     begin
     accept draw;
@@ -227,8 +299,8 @@ procedure Mandelbrot is
     end;
     
   begin
-  	null;
   	T1.compute;
+  	T2.compute2;
   	T5.draw;
   end draw_buddhabrot;
 
@@ -236,6 +308,33 @@ procedure Mandelbrot is
     begin
       Context.Fill_Rectangle ((0, 0, integer(image_x), integer(image_y)));
     end clear_screen;
+  
+  procedure Write_image_PPM_IO (ImageFractal: in out Context_2D_Type) is
+   --package PPM_IO is
+    -- new Ada.Streams.Stream_IO.File_Type (Integer);
+   --use PPM_IO;
+   -- F : Ada.Streams.Stream_IO.File_Type;
+   -- name : constant String := "Image_file";
+	
+	begin
+   	 Create (F, Out_File, name & ".ppm");
+   		--  PPM Header:
+    	 String'Write (
+      		Stream (F),
+      		"P6 " &
+      		integer'image(integer(image_y)) &
+      		integer'image(integer(image_x)) & " 255" & ASCII.LF
+		);
+		-- PPM image:	 
+    	  for y in 1..integer(image_x) loop
+      		for x in 1..integer(image_y) loop
+        	Unsigned_8'Write (Stream (f), Unsigned_8(Pixel(ImageFractal,x, y).Red));
+        	Unsigned_8'Write (Stream (f), Unsigned_8(Pixel(ImageFractal,x, y).Green));
+        	Unsigned_8'Write (Stream (f), Unsigned_8(Pixel(ImageFractal,x, y).Blue));
+      		end loop;
+    	  end loop;
+   		Close (F);
+	end Write_image_PPM_IO;
 
   procedure On_Click_julia (Object : in out Gnoga.Gui.Base.Base_Type'Class);
    --  The procedure matches the prototype for Action_Events
@@ -276,12 +375,13 @@ procedure Mandelbrot is
    end On_Click_buddhabrot;
 
   procedure On_Image (Object : in out Gnoga.Gui.Base.Base_Type'Class);
-   --  When this action is fired it will rotate the image by 90°
+   --  When this action is fired it will save the image as .png
   procedure On_Image (Object : in out Gnoga.Gui.Base.Base_Type'Class) is
       pragma Unreferenced (Object);
    begin
-      Image_Import.Create(Mon_Canvas,"/image/Yourfractal.png");
-      
+      Get_Image_Data (Context,Image_Ini,0,0,integer(image_x),integer(image_y));
+      Write_image_PPM_IO(Context);
+      --Image_Export.Create(Mon_Canvas,"/image/Yourfractal.png");
    end On_Image;
 
   procedure On_Exit (Object : in out Gnoga.Gui.Base.Base_Type'Class);
@@ -352,12 +452,14 @@ begin --  Mandelbrot
   My_View.Horizontal_Rule;
   Mon_Canvas.Create (Parent => My_View, Width => 1200, Height => 800);
   Context.Get_Drawing_Context_2D (Mon_Canvas);
+  
   Context.Save;
   Context.Font (Height => "1px");
   Context.Fill_Color ("white");
+  Context.Rotate_Degrees(90.0);
+  context.translate(0,-integer(image_y));
   Context.Fill_Rectangle ((0, 0, integer(image_x), integer(image_y)));
-
-  
+  --Draw_Image (Context,Image_sauvegarde,0,0);
   
 Gnoga.Application.Singleton.Message_Loop;
 
