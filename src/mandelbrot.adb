@@ -8,7 +8,7 @@
 --| Author           : Frederic Desnoes
 --| Created On       : 2020/05/06
 --| Last Modified By : $Author: Frederic Desnoes$
---| Last Modified On : $Date: 2022/07/02$
+--| Last Modified On : $Date: 2022/07/07$
 --| Status           : $State: Expe $
 --|
 --------------------------------------------------------------------------------
@@ -22,6 +22,8 @@ with Ada.Streams.Stream_IO; use Ada.Streams.Stream_IO;
 with Ada.Text_IO;
 with Interfaces; use interfaces;
 with Delay_Aux_Pkg;
+with Draw_mandelbrot;
+with draw_julia;
 
 with Gnoga.Types;
 with Gnoga.Types.Colors; use Gnoga.Types.Colors;
@@ -66,11 +68,11 @@ procedure Mandelbrot is
   Julia_Input_text_y1: Gnoga.Gui.Element.Form.Text_Type;
   Julia_Question_Label_y1: Gnoga.Gui.Element.Form.Label_Type;
 
-  X1 : constant float := -2.1;
-  X2 : constant float := 0.6;
-  y1 : constant float := -1.2;
-  y2 : constant float := 1.2;
-  zoom : constant float := 200.0; -- pour une distance de 1 sur le plan, on a 300 pixel sur l'image
+  X1 : constant float := -1.5; ---2.1;
+  X2 : constant float := 1.5; --0.6;
+  y1 : constant float := -1.5; ---1.2;
+  y2 : constant float := 1.5; --1.2;
+  zoom : constant float := 200.0; -- pour une distance de 1 sur le plan, on a 200 pixel sur l'image
   iteration_max : integer := 25;
 
   image_x : constant float := (x2-x1)*zoom;
@@ -87,92 +89,96 @@ procedure Mandelbrot is
   
   
 
- procedure draw_mandelbrot (Iteration_Max: Integer) is
-    begin
-    Screen_X:=0.0;    
-     while Screen_X < image_x loop
-     Screen_Y:=0.0;
-        while Screen_Y < image_y loop
-          c_r := Screen_X / zoom + x1;
-          c_i := Screen_Y / zoom + y1;
-          z_r := 0.0;
-          z_i := 0.0;
-          Iteration:= 0;
-          while z_r* z_r + z_i * z_i < 4.0 and then Iteration < iteration_max loop
-            tmp := z_r;
-            z_r := z_r * z_r - z_i * z_i + c_r;
-            z_i := 2.0 * z_i*tmp  + c_i;
-            Iteration := Iteration + 1;
-          end loop;
-          if Iteration = Iteration_Max then
-            Context.Stroke_Text(".",integer(Screen_X) ,integer(Screen_Y) );
-            Context.Stroke;
-          else
-            null;
-          end if;
-          Screen_Y := Screen_Y +1.0;
-          end loop;
-        Screen_X := Screen_X +1.0;
-        end loop;
-  end draw_mandelbrot;
+ --procedure draw_mandelbrot (Iteration_Max: Integer) is
+ --   begin
+  --  Screen_X:=0.0;    
+  --   while Screen_X < image_x loop
+  --   Screen_Y:=0.0;
+  --      while Screen_Y < image_y loop
+  --        c_r := Screen_X / zoom + x1;
+  --        c_i := Screen_Y / zoom + y1;
+  --        z_r := 0.0;
+  --        z_i := 0.0;
+  --        Iteration:= 0;
+  --        while z_r* z_r + z_i * z_i < 4.0 and then Iteration < iteration_max loop
+  --          tmp := z_r;
+  --          z_r := z_r * z_r - z_i * z_i + c_r;
+  --          z_i := 2.0 * z_i*tmp  + c_i;
+  --          Iteration := Iteration + 1;
+  --        end loop;
+  --        if Iteration = Iteration_Max then
+  --          Context.Stroke_Text(".",integer(Screen_X) ,integer(Screen_Y) );
+  --          Context.Stroke;
+  --        else
+  --          null;
+  --        end if;
+  --        Screen_Y := Screen_Y +1.0;
+  --        end loop;
+  --      Screen_X := Screen_X +1.0;
+  --      end loop;
+  -- end draw_mandelbrot;
  
-  procedure draw_julia (c_r:float; c_i: float; iteration_Max: Integer)
-  	with Pre => (c_r > -2.1 and c_r< 0.6 and c_i> -1.2 and c_i <1.2) is
-    begin
-    Screen_X:=0.0;    
-     while Screen_X < image_x loop
-     Screen_Y:=0.0;
-        while Screen_Y < image_y loop
-          z_r := Screen_X / zoom + x1+0.5;
-          z_i := Screen_Y / zoom + y1;
-          Iteration:= 0;
-          while z_r* z_r + z_i * z_i < 4.0 and then Iteration < iteration_max loop
-            tmp := z_r;
-            z_r := z_r * z_r - z_i * z_i + c_r;
-            z_i := 2.0 * z_i*tmp  + c_i;
-            Iteration := Iteration + 1;
-          end loop;
-          if Iteration = Iteration_Max then
-            Context.Stroke_Text(".",integer(Screen_X) ,integer(Screen_Y) );
-            Context.Stroke;
-          else
-            null;
-          end if;
-          Screen_Y := Screen_Y +1.0;
-          end loop;
-        Screen_X := Screen_X +1.0;
-        end loop;
-  end draw_julia;
+  --procedure draw_julia (c_r:float; c_i: float; iteration_Max: Integer)
+  --	with Pre => (c_r > -2.1 and c_r< 0.6 and c_i> -1.2 and c_i <1.2) is
+  --  begin
+  --  Screen_X:=0.0;    
+  --   while Screen_X < image_x loop
+  --   Screen_Y:=0.0;
+  --      while Screen_Y < image_y loop
+   --       z_r := Screen_X / zoom + x1+0.5;
+   --       z_i := Screen_Y / zoom + y1;
+   --       Iteration:= 0;
+   --       while z_r* z_r + z_i * z_i < 4.0 and then Iteration < iteration_max loop
+  --          tmp := z_r;
+  --          z_r := z_r * z_r - z_i * z_i + c_r;
+ --           z_i := 2.0 * z_i*tmp + c_i;
+ --           Iteration := Iteration + 1;
+ --         end loop;
+--          if Iteration = Iteration_Max then
+--            Context.Stroke_Text(".",integer(Screen_X) ,integer(Screen_Y) );
+--            Context.Stroke;
+ --         else
+ --           null;
+ --         end if;
+ --         Screen_Y := Screen_Y +1.0;
+ --         end loop;
+ --       Screen_X := Screen_X +1.0;
+ --       end loop;
+ -- end draw_julia;
 
   procedure draw_buddhabrot(Iteration_Max : Integer) is
     pixels: array (integer range 1 .. integer(image_x), integer range 1 .. integer(image_y)) of integer;
-    tmp_pixel: array (integer range 1 .. integer(image_x), integer range 1 .. integer(image_y)) of integer;
+    --tmp_pixel: array (integer range 1 .. integer(image_x), integer range 1 .. integer(image_y)) of integer;
     value_color: Gnoga.Types.Color_Type;
     tmp_color: Gnoga.Types.RGBA_Type;
     task T1 is
-    	entry compute;
+    	entry compute1;
     end T1;
     task T2 is
     	entry compute2;
     end T2;
-    --task T2;
     --task T3;
     --task T4;
     task T5 is
-    	entry draw;
+    	entry draw1;
+    	entry draw2;
     end T5;
     
     
     task body T1 is
+    	i,j, iteration: integer;
+    	Screen_X, Screen_Y, c_r, c_i, z_r, z_i, tmp: float;
+    	tmp_pixel: array (integer range 1 .. integer(image_x), integer range 1 .. integer(image_y)) of integer;
+    	
       begin
-      accept compute do
+      --accept compute1 do
       Screen_X:=0.0;  
-      for i in 1 .. integer(image_x)/2 loop
+      for i in 1 .. integer(image_x/2.0) loop
         for j in 1 .. integer(image_y) loop
           pixels (i,j) := 0;
         end loop;
       end loop; 
-       while Screen_X < image_x loop
+       while Screen_X < image_x/2.0+1.0 loop
        Screen_Y:=0.0;
           while Screen_Y < image_y loop
             c_r := Screen_X / zoom + x1;
@@ -212,13 +218,17 @@ procedure Mandelbrot is
           Screen_X := Screen_X +1.0;
         end loop;
         Delay_Aux_Pkg.Show_Elapsed_Time;
-       end compute;
+        T5.draw1;
+        --end compute1;
        end;
        
        
     task body T2 is
+    	i,j, iteration: integer;
+    	Screen_X, Screen_Y, c_r, c_i, z_r, z_i, tmp: float;
+    	tmp_pixel: array (integer range 1 .. integer(image_x), integer range 1 .. integer(image_y)) of integer;
       begin
-      accept compute2 do
+      --accept compute2 do
       Screen_X:=image_x/2.0+1.0;  
       for i in integer(image_x/2.0)+1 .. integer(image_x) loop
         for j in 1 .. integer(image_y) loop
@@ -265,24 +275,21 @@ procedure Mandelbrot is
           Screen_X := Screen_X +1.0;
         end loop;
         Delay_Aux_Pkg.Show_Elapsed_Time;
-        end compute2;
+        T5.draw2;
+        --end compute2;
     end;
        
     task body T5 is  
     begin
-    accept draw;
+    accept draw2 do
+    accept draw1 do
     delay 10.0;     
     for i in 1 .. integer(image_x) loop
       for j in 1 .. integer(image_y) loop
         if pixels (i,j) /= 0
           then
-            -- tmp_color := Gnoga.Types.colors.To_Color_Enumeration(integer'Min(pixels(i,j), 255), integer'Min(pixels(i,j), 255), integer'Min(pixels(i,j), 255),1.0);
-            -- tmp_color := (255, 0, 0, 1.0);
-            -- value_color :=integer'image(integer'Min(pixels(i,j), 255));
             value_color :=Gnoga.types.color_type'value(integer'image(255-integer'Min(pixels(i,j), 255)));
-            -- tmp_color := Gnoga.types.To_RGBA(0,0,integer'image(integer'Min(pixels(i,j),255)),1.0);
             tmp_color := (0,0,value_color,1.0);
-            -- Context.Stroke_Color("Gnoga.Types.Colors.To_Color_Enumeration(tmp_color)");
             Context.Stroke_Color(tmp_color);
             Context.Stroke_Text(".",i ,j);
             Context.Stroke;
@@ -290,12 +297,12 @@ procedure Mandelbrot is
       end loop;
     end loop;
     Delay_Aux_Pkg.Show_Elapsed_Time;
+    end draw1;
+    end draw2;
     end;
     
   begin
-  	T1.compute;
-  	T2.compute2;
-  	T5.draw;
+  	null;
   end draw_buddhabrot;
 
   Procedure clear_screen is
@@ -338,18 +345,26 @@ procedure Mandelbrot is
       My_View.Put_Line ("I've been clicked!");
       clear_screen;
       Context.Stroke_Color ("Blue");
-      draw_julia (Float'Value(Julia_Input_Text_x1.value), Float'Value(Julia_Input_Text_y1.value), Integer'Value(Input_Text_Iterations.value));
+      draw_julia (Iteration_Max,
+ 			image_x, image_y,
+ 			zoom,
+ 			x1, y1,
+ 			Float'Value(Julia_Input_Text_x1.value), Float'Value(Julia_Input_Text_y1.value),
+ 			Context);
    end On_Click_julia;
   
   procedure On_Click_mandelbrot (Object : in out Gnoga.Gui.Base.Base_Type'Class);
   procedure On_Click_mandelbrot (Object : in out Gnoga.Gui.Base.Base_Type'Class) is
       pragma Unreferenced (Object);
    begin
+      clear_screen;
       My_View.New_Line;
       My_View.Put_Line ("I've been clicked!");
-      clear_screen;
       Context.Stroke_Color ("Blue");
-      draw_mandelbrot(Integer'Value(Input_Text_Iterations.value));
+      draw_mandelbrot(Integer'Value(Input_Text_Iterations.value),
+ 			image_x, image_y,
+ 			zoom,x1, y1,
+ 			Context);
    end On_Click_mandelbrot;
 
   procedure On_Click_buddhabrot (Object : in out Gnoga.Gui.Base.Base_Type'Class);
@@ -425,18 +440,8 @@ begin --  Mandelbrot
   
   Julia_Form_y1.Create(My_View);
   Julia_Input_Text_y1.Create(Julia_Form_y1, 20, "0.01");
-  Julia_Question_Label_y1.Create(Julia_Form_y1, Julia_Input_Text_y1, "Enter the imaginary part of c as a float between -1,2 and +1,2");
+  Julia_Question_Label_y1.Create(Julia_Form_y1, Julia_Input_Text_y1, "Enter the imaginary part of c as a float between -1.2 and +1.2");
 
-
-  -- Julia_Label.Create (Julia_Form,Julia_Value_Label,"x1",false);
-  -- Julia_Range.Create (Julia_Form);
-  -- Julia_Range.Minimum (-2.1);
-  -- Julia_Range.Maximum (0.6);
-  -- Julia_Range.Value (0.285);
-  -- Julia_Value_Label.Create (Julia_Form, Julia_Range, Julia_range.value, False); 
-  -- Julia_Range_Label.Create (Julia_Form, Julia_Range, " ", False); 
-  -- Julia_Range.On_Change_Handler (Julia_Range_Change'Unrestricted_Access);
-  
   My_View.Horizontal_Rule;
   Mon_Canvas.Create (Parent => My_View, Width => 1200, Height => 800);
   Context.Get_Drawing_Context_2D (Mon_Canvas);
