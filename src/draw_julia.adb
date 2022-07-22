@@ -36,7 +36,7 @@ with Gnoga.Gui.Element.Canvas.Context_2D; use Gnoga.Gui.Element.Canvas.Context_2
      while Screen_X < image_x loop
      Screen_Y:=0.0;
         while Screen_Y < image_y loop
-          z_r := Screen_X / zoom + x1;
+          z_r := Screen_X / zoom + x1 + 0.5;
           z_i := Screen_Y / zoom + y1;
           Iteration:= 0;
           while z_r* z_r + z_i * z_i < 4.0 and then Iteration < iteration_max loop

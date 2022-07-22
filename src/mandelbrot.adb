@@ -8,7 +8,7 @@
 --| Author           : Frederic Desnoes
 --| Created On       : 2020/05/06
 --| Last Modified By : $Author: Frederic Desnoes$
---| Last Modified On : $Date: 2022/07/07$
+--| Last Modified On : $Date: 2022/07/13$
 --| Status           : $State: Expe $
 --|
 --------------------------------------------------------------------------------
@@ -22,8 +22,10 @@ with Ada.Streams.Stream_IO; use Ada.Streams.Stream_IO;
 with Ada.Text_IO;
 with Interfaces; use interfaces;
 with Delay_Aux_Pkg;
-with Draw_mandelbrot;
+with draw_mandelbrot;
 with draw_julia;
+with draw_buddhabrot;
+with mandelbrot_types; use mandelbrot_types;
 
 with Gnoga.Types;
 with Gnoga.Types.Colors; use Gnoga.Types.Colors;
@@ -68,227 +70,101 @@ procedure Mandelbrot is
   Julia_Input_text_y1: Gnoga.Gui.Element.Form.Text_Type;
   Julia_Question_Label_y1: Gnoga.Gui.Element.Form.Label_Type;
 
-  X1 : constant float := -1.5; ---2.1;
-  X2 : constant float := 1.5; --0.6;
-  y1 : constant float := -1.5; ---1.2;
-  y2 : constant float := 1.5; --1.2;
-  zoom : constant float := 200.0; -- pour une distance de 1 sur le plan, on a 200 pixel sur l'image
-  iteration_max : integer := 25;
 
-  image_x : constant float := (x2-x1)*zoom;
-  image_y : constant float := (y2-y1)*zoom;
-
-  c_r : float := 0.0;
-  c_i : float := 0.0;
-  z_r : float := 0.0;
-  z_i : float := 0.0;
-  tmp : float := 0.0;
-  Iteration : integer := 0;
-  Screen_X : float := 0.0;
-  Screen_Y : float := 0.0;
-  
-  
-
- --procedure draw_mandelbrot (Iteration_Max: Integer) is
- --   begin
-  --  Screen_X:=0.0;    
-  --   while Screen_X < image_x loop
-  --   Screen_Y:=0.0;
-  --      while Screen_Y < image_y loop
-  --        c_r := Screen_X / zoom + x1;
-  --        c_i := Screen_Y / zoom + y1;
-  --        z_r := 0.0;
-  --        z_i := 0.0;
-  --        Iteration:= 0;
-  --        while z_r* z_r + z_i * z_i < 4.0 and then Iteration < iteration_max loop
-  --          tmp := z_r;
-  --          z_r := z_r * z_r - z_i * z_i + c_r;
-  --          z_i := 2.0 * z_i*tmp  + c_i;
-  --          Iteration := Iteration + 1;
-  --        end loop;
-  --        if Iteration = Iteration_Max then
-  --          Context.Stroke_Text(".",integer(Screen_X) ,integer(Screen_Y) );
-  --          Context.Stroke;
-  --        else
-  --          null;
-  --        end if;
-  --        Screen_Y := Screen_Y +1.0;
-  --        end loop;
-  --      Screen_X := Screen_X +1.0;
-  --      end loop;
-  -- end draw_mandelbrot;
- 
-  --procedure draw_julia (c_r:float; c_i: float; iteration_Max: Integer)
-  --	with Pre => (c_r > -2.1 and c_r< 0.6 and c_i> -1.2 and c_i <1.2) is
-  --  begin
-  --  Screen_X:=0.0;    
-  --   while Screen_X < image_x loop
-  --   Screen_Y:=0.0;
-  --      while Screen_Y < image_y loop
-   --       z_r := Screen_X / zoom + x1+0.5;
-   --       z_i := Screen_Y / zoom + y1;
-   --       Iteration:= 0;
-   --       while z_r* z_r + z_i * z_i < 4.0 and then Iteration < iteration_max loop
-  --          tmp := z_r;
-  --          z_r := z_r * z_r - z_i * z_i + c_r;
- --           z_i := 2.0 * z_i*tmp + c_i;
- --           Iteration := Iteration + 1;
- --         end loop;
---          if Iteration = Iteration_Max then
---            Context.Stroke_Text(".",integer(Screen_X) ,integer(Screen_Y) );
---            Context.Stroke;
- --         else
- --           null;
- --         end if;
- --         Screen_Y := Screen_Y +1.0;
- --         end loop;
- --       Screen_X := Screen_X +1.0;
- --       end loop;
- -- end draw_julia;
-
-  procedure draw_buddhabrot(Iteration_Max : Integer) is
-    pixels: array (integer range 1 .. integer(image_x), integer range 1 .. integer(image_y)) of integer;
-    --tmp_pixel: array (integer range 1 .. integer(image_x), integer range 1 .. integer(image_y)) of integer;
+  procedure draw_buddhabrot_tasking(Iteration_Max : Integer) is
     value_color: Gnoga.Types.Color_Type;
     tmp_color: Gnoga.Types.RGBA_Type;
+    
     task T1 is
     	entry compute1;
     end T1;
     task T2 is
     	entry compute2;
     end T2;
-    --task T3;
+    task T3 is
+    	entry compute3;
+    end T3;
+    task T4 is
+    	entry compute4;
+    end T4; 
     --task T4;
     task T5 is
     	entry draw1;
     	entry draw2;
+    	entry draw3;
+    	entry draw4;
     end T5;
     
     
     task body T1 is
-    	i,j, iteration: integer;
-    	Screen_X, Screen_Y, c_r, c_i, z_r, z_i, tmp: float;
-    	tmp_pixel: array (integer range 1 .. integer(image_x), integer range 1 .. integer(image_y)) of integer;
     	
       begin
-      --accept compute1 do
-      Screen_X:=0.0;  
-      for i in 1 .. integer(image_x/2.0) loop
-        for j in 1 .. integer(image_y) loop
-          pixels (i,j) := 0;
-        end loop;
-      end loop; 
-       while Screen_X < image_x/2.0+1.0 loop
-       Screen_Y:=0.0;
-          while Screen_Y < image_y loop
-            c_r := Screen_X / zoom + x1;
-            c_i := Screen_Y / zoom + y1;
-            z_r := 0.0;
-            z_i := 0.0;
-            Iteration:= 0;
-            for i in 1 .. integer(image_x) loop
-              for j in 1 .. integer(image_y) loop
-                tmp_pixel (i,j) := 0;
-              end loop;
-            end loop;
-            while z_r* z_r + z_i * z_i < 4.0 and then Iteration < iteration_max loop
-              tmp := z_r;
-              z_r := z_r * z_r - z_i * z_i + c_r;
-              z_i := 2.0 * z_i*tmp  + c_i;
-              Iteration := Iteration + 1;
-              if integer((z_r-x1)*zoom) < integer(image_x) and integer((z_r-x1)*zoom) > 0 and integer((z_i-y1)*zoom) < integer(image_y) and integer((z_i-y1)*zoom) > 0
-                then
-                  tmp_pixel(integer((z_r-x1)*zoom),integer((z_i-y1)*zoom)) := 1;
-              end if;
-            end loop;
-            if Iteration /= Iteration_Max then
-              for i in 1 .. integer(image_x) loop
-                for j in 1 .. integer(image_y) loop
-                  if tmp_pixel (i,j) = 1
-                    then
-                    pixels(i,j):=pixels(i,j)+1;
-                  end if;
-                end loop;
-              end loop;
-            else
-              null;
-            end if;
-            Screen_Y := Screen_Y +1.0;
-          end loop;
-          Screen_X := Screen_X +1.0;
-        end loop;
-        Delay_Aux_Pkg.Show_Elapsed_Time;
+      	draw_buddhabrot (Iteration_Max,
+      			x1,y1,
+      			image_x,image_y,
+ 			1.0,image_x/2.0,1.0, image_y/2.0,
+ 			pixels,
+ 			zoom);
+        --Delay_Aux_Pkg.Show_Elapsed_Time;
         T5.draw1;
         --end compute1;
        end;
        
        
     task body T2 is
-    	i,j, iteration: integer;
-    	Screen_X, Screen_Y, c_r, c_i, z_r, z_i, tmp: float;
-    	tmp_pixel: array (integer range 1 .. integer(image_x), integer range 1 .. integer(image_y)) of integer;
+    	
       begin
-      --accept compute2 do
-      Screen_X:=image_x/2.0+1.0;  
-      for i in integer(image_x/2.0)+1 .. integer(image_x) loop
-        for j in 1 .. integer(image_y) loop
-          pixels (i,j) := 0;
-        end loop;
-      end loop; 
-       while Screen_X < image_x loop
-       Screen_Y:=0.0;
-          while Screen_Y < image_y loop
-            c_r := Screen_X / zoom + x1;
-            c_i := Screen_Y / zoom + y1;
-            z_r := 0.0;
-            z_i := 0.0;
-            Iteration:= 0;
-            for i in 1 .. integer(image_x) loop
-              for j in 1 .. integer(image_y) loop
-                tmp_pixel (i,j) := 0;
-              end loop;
-            end loop;
-            while z_r* z_r + z_i * z_i < 4.0 and then Iteration < iteration_max loop
-              tmp := z_r;
-              z_r := z_r * z_r - z_i * z_i + c_r;
-              z_i := 2.0 * z_i*tmp  + c_i;
-              Iteration := Iteration + 1;
-              if integer((z_r-x1)*zoom) < integer(image_x) and integer((z_r-x1)*zoom) > 0 and integer((z_i-y1)*zoom) < integer(image_y) and integer((z_i-y1)*zoom) > 0
-                then
-                  tmp_pixel(integer((z_r-x1)*zoom),integer((z_i-y1)*zoom)) := 1;
-              end if;
-            end loop;
-            if Iteration /= Iteration_Max then
-              for i in integer(image_x/2.0)+1 .. integer(image_x) loop
-                for j in 1 .. integer(image_y) loop
-                  if tmp_pixel (i,j) = 1
-                    then
-                    pixels(i,j):=pixels(i,j)+1;
-                  end if;
-                end loop;
-              end loop;
-            else
-              null;
-            end if;
-            Screen_Y := Screen_Y +1.0;
-          end loop;
-          Screen_X := Screen_X +1.0;
-        end loop;
-        Delay_Aux_Pkg.Show_Elapsed_Time;
+      draw_buddhabrot (Iteration_Max,
+      			x1,y1,
+      			image_x,image_y,
+ 			image_x/2.0+1.0,image_x,1.0, image_y/2.0,
+ 			pixels,
+ 			zoom);
+        --Delay_Aux_Pkg.Show_Elapsed_Time;
         T5.draw2;
         --end compute2;
     end;
+    
+    task body T3 is
+    	
+      begin
+      draw_buddhabrot (Iteration_Max,
+      			x1,y1,
+      			image_x,image_y,
+ 			image_x/2.0+1.0,image_x,image_y/2.0+1.0, image_y,
+ 			pixels,
+ 			zoom);
+        --Delay_Aux_Pkg.Show_Elapsed_Time; 
+        T5.draw3;
+        --end compute2;
+    end;
+    
+   task body T4 is
+    	
+      begin
+      draw_buddhabrot (Iteration_Max,
+      			x1,y1,
+      			image_x,image_y,
+ 			1.0,image_x/2.0,image_y/2.0+1.0, image_y,
+ 			pixels,
+ 			zoom);
+        --Delay_Aux_Pkg.Show_Elapsed_Time;
+        T5.draw4;
+        --end compute2;
+       end;
        
     task body T5 is  
     begin
-    accept draw2 do
     accept draw1 do
+    accept draw2 do
+    accept draw3 do
+    accept draw4 do
     delay 10.0;     
     for i in 1 .. integer(image_x) loop
       for j in 1 .. integer(image_y) loop
-        if pixels (i,j) /= 0
+        if pixels (i,j).n /= 0
           then
-            value_color :=Gnoga.types.color_type'value(integer'image(255-integer'Min(pixels(i,j), 255)));
+            value_color :=Gnoga.types.color_type'value(integer'image(255-integer'Min(pixels(i,j).n, 255)));
             tmp_color := (0,0,value_color,1.0);
             Context.Stroke_Color(tmp_color);
             Context.Stroke_Text(".",i ,j);
@@ -297,17 +173,19 @@ procedure Mandelbrot is
       end loop;
     end loop;
     Delay_Aux_Pkg.Show_Elapsed_Time;
-    end draw1;
+    end draw4;
+    end draw3;
     end draw2;
-    end;
+    end draw1;
+    end T5;
     
   begin
   	null;
-  end draw_buddhabrot;
+  end draw_buddhabrot_tasking;
 
   Procedure clear_screen is
     begin
-      Context.Fill_Rectangle ((0, 0, integer(image_x), integer(image_y)));
+      Context.Fill_Rectangle ((1, 1, integer(image_x), integer(image_y)));
     end clear_screen;
   
   procedure Write_image_PPM_IO (ImageFractal: in out Context_2D_Type) is	
@@ -374,7 +252,7 @@ procedure Mandelbrot is
       My_View.New_Line;
       My_View.Put_Line ("I've been clicked!");
       clear_screen;
-      draw_buddhabrot(Integer'Value(Input_Text_Iterations.value));
+      draw_buddhabrot_tasking(Integer'Value(Input_Text_Iterations.value));
    end On_Click_buddhabrot;
 
   procedure On_Image (Object : in out Gnoga.Gui.Base.Base_Type'Class);
@@ -451,8 +329,7 @@ begin --  Mandelbrot
   Context.Fill_Color ("white");
   Context.Rotate_Degrees(90.0);
   context.translate(0,-integer(image_y));
-  Context.Fill_Rectangle ((0, 0, integer(image_x), integer(image_y)));
-  --Draw_Image (Context,Image_sauvegarde,0,0);
+  Context.Fill_Rectangle ((1, 1, integer(image_x), integer(image_y)));
   
 Gnoga.Application.Singleton.Message_Loop;
 
