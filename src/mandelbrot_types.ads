@@ -1,4 +1,6 @@
 with Ada.Unchecked_Conversion;
+with UXStrings.Formatting;
+with UXStrings.Text_IO;
 
 
 with Gnoga.Types;
@@ -14,6 +16,9 @@ with Gnoga.Gui.Element.Multimedia;
 with Gnoga.Gui.Element.form;
 
 Package mandelbrot_types is
+
+use type Gnoga.String;
+	subtype String is Gnoga.String;
 
 type pix is record
 	n: integer range 0..255;
