@@ -41,14 +41,14 @@ with Gnoga.Gui.Element.form;
 
 ----------------------------------------------------------------------------
 
---Package body mandelbrot is
-
---	use all type Gnoga.String;
---	subtype String is Gnoga.String;
+procedure fractals is
+use gnoga;
+	use all type Gnoga.String;
+	--subtype String is Gnoga.String;
 	----------------------------------------------------------------------------
-	procedure Mandelbrot is
-	 -- use all type Gnoga.String;
-	 -- subtype String is Gnoga.String;
+	--procedure Mandelbrot is
+	  --use all type Gnoga.String;
+	  --subtype String is Gnoga.String;
 	  Main_Window : Gnoga.Gui.Window.Window_Type;
 	  My_Window : Gnoga.Gui.Window.Window_Type;
 	  My_View : Gnoga.Gui.View.View_Type;
@@ -197,8 +197,10 @@ with Gnoga.Gui.Element.form;
 	    end clear_screen;
 	  
 	  procedure Write_image_PPM_IO (ImageFractal: in out Context_2D_Type) is	
+		S : Stream_Access;
 		begin
 	   	 Create (F, Out_File, name & ".ppm");
+	   	 S:=Stream(F);
 	   		--  PPM Header:
 	    	 String'Write (
 	      		Stream (F),
@@ -209,12 +211,12 @@ with Gnoga.Gui.Element.form;
 			-- PPM image:	 
 	    	  for y in 1..integer(image_x) loop
 	      		for x in 1..integer(image_y) loop
-			Unsigned_8'Write (Stream (f), Unsigned_8(Pixel(ImageFractal,x, y).Red));
-			Unsigned_8'Write (Stream (f), Unsigned_8(Pixel(ImageFractal,x, y).Green));
-			Unsigned_8'Write (Stream (f), Unsigned_8(Pixel(ImageFractal,x, y).Blue));
+			Unsigned_8'Write (S, Unsigned_8(Pixel(ImageFractal,x, y).Red));
+			Unsigned_8'Write (S, Unsigned_8(Pixel(ImageFractal,x, y).Green));
+			Unsigned_8'Write (S, Unsigned_8(Pixel(ImageFractal,x, y).Blue));
 	      		end loop;
 	    	  end loop;
-	   		Close (F);
+	   	 Close (F);
 		end Write_image_PPM_IO;
 
 	  procedure On_Click_julia (Object : in out Gnoga.Gui.Base.Base_Type'Class);
@@ -235,7 +237,7 @@ with Gnoga.Gui.Element.form;
 	 			image_x, image_y,
 	 			zoom,
 	 			x1, y1,
-	 			Float'Value(Julia_Input_Text_x1.value), Float'Value(Julia_Input_Text_y1.value),
+	 			value(Julia_Input_Text_x1.value), value(Julia_Input_Text_y1.value),
 	 			Context);
 	   end On_Click_julia;
 	  
@@ -247,7 +249,7 @@ with Gnoga.Gui.Element.form;
 	      My_View.New_Line;
 	      My_View.Put_Line ("I've been clicked!");
 	      Context.Stroke_Color ("Blue");
-	      draw_mandelbrot(Integer'Value(Input_Text_Iterations.value),
+	      draw_mandelbrot(Value(Input_Text_Iterations.value),
 	 			image_x, image_y,
 	 			zoom,x1, y1,
 	 			Context);
@@ -260,7 +262,7 @@ with Gnoga.Gui.Element.form;
 	      My_View.New_Line;
 	      My_View.Put_Line ("I've been clicked!");
 	      clear_screen;
-	      draw_buddhabrot_tasking(Integer'Value(Input_Text_Iterations.value));
+	      draw_buddhabrot_tasking(Value(Input_Text_Iterations.value));
 	   end On_Click_buddhabrot;
 
 	  procedure On_Image (Object : in out Gnoga.Gui.Base.Base_Type'Class);
@@ -341,13 +343,13 @@ with Gnoga.Gui.Element.form;
 	  
 	Gnoga.Application.Singleton.Message_Loop;
 
+	--exception
+	  --when E : others =>
+	    --Gnoga.Log (Ada.Exceptions.Exception_Name (E) & " - " & --Ada.Exceptions.Exception_Message (E));
+	--end Mandelbrot;
 	exception
-	  when E : others =>
-	    Gnoga.Log (Ada.Exceptions.Exception_Name (E) & " - " & Ada.Exceptions.Exception_Message (E));
-	end Mandelbrot;
---exception
- -- when E : other =>
---  	Gnoga.log(E);
-
--- end mandelbrot;
+ 		when E : others =>
+		  	Gnoga.log(E);
+	--end mandelbrot;
+end fractals;
 

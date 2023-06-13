@@ -1,5 +1,6 @@
 # fractals
 Fractal program in ADA
+<<<<<<< HEAD
 
 Compatibility: 
 fractals is compatible with platforms supporting gnat compiler, including Mac OSX x86, Linux Ubuntu running on ARM.
@@ -30,3 +31,5 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+=======
+>>>>>>> 00aeb10 (Initial commit)

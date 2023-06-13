@@ -1,15 +1,16 @@
 
-with "/home/frederic/dev/10-ADA/00-util/gnoga_2.1.2_5f127c56/src/gnoga.gpr";
--- with "/home/frederic/dev/10-ADA/00-util/gnoga_2.1.2_5f127c56/settings.gpr";
+with "/opt/gnoga_2.1.2_5f127c56/src/gnoga.gpr";
+with "/opt/gnoga_2.1.2_5f127c56/settings.gpr";
 -- with "lib_gnoga.gpr";
 
 project mandelbrot is
    for Languages use ("ada");
    for Source_Dirs use (".");
+   for Object_Dir use "../obj";
    for Exec_Dir use "../bin";
    for Main use ("fractals.adb");
     package Compiler is
-       for Default_Switches ("Ada") use ("-g", "-O0", "-gnata", "-gnatwa","-gnatW8");
+       for Default_Switches ("Ada") use ("-g", "-O0", "-gnata", "-gnatwa","-gnatW8","-gnatf");
       --COMPILER_SWITCHES_PLACEHOLDER--
     end Compiler;
 end mandelbrot;
