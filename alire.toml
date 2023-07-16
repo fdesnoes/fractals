@@ -1,0 +1,11 @@
+name = "fractals"
+description = "Shiny new project"
+version = "0.1.0-dev"
+
+authors = ["Your Name"]
+maintainers = ["Your Name <example@example.com>"]
+maintainers-logins = ["github-username"]
+
+executables = ["fractals"]
+[[depends-on]]
+gnoga = "^2.1.2"

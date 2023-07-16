@@ -1,7 +1,7 @@
 
-with "/opt/gnoga_2.1.2_5f127c56/src/gnoga.gpr";
-with "/opt/gnoga_2.1.2_5f127c56/settings.gpr";
--- with "lib_gnoga.gpr";
+--with "/home/fredericdes/dev/ADA/alire/gnoga_2.1.2_5f127c56/src/gnoga.gpr";
+--with "/home/fredericdes/dev/ADA/alire/gnoga_2.1.2_5f127c56/settings.gpr";
+with "/home/fredericdes/dev/ADA/alire/gnoga_2.1.2_5f127c56/lib_gnoga.gpr";
 
 project mandelbrot is
    for Languages use ("ada");
