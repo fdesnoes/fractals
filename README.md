@@ -10,9 +10,9 @@ It uses GNOGA for the user interface which can be downloaded at
 https://sourceforge.net/projects/gnoga/files/)
 
 Licence
-MIT License
+Apache License Version 2.0
 
-Copyright (c) 2022 fdesnoes
+Copyright (c) 2023 fdesnoes
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
