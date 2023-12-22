@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+   name: fractal-deployment
+spec:
+  replicas: 3
+  selector:
+   matchLabels:
+    app: fractals
+  template: 
+   metadata:
+    labels:
+     app: fractals
+   spec:
+    containers:
+    - name: fractals
+      image: fdesnoes/fractals:1.1
+      #commands: [ "/bin/sh", "-c", "--" ]
+      #args: [ "while true; do sleep 30; done;" ]
+      ports:
+      - containerPort: 8080
+    #imagePullSecrets:
+    #- name: regcred
+    tolerations:
+    - operator: "Exists"
+    
